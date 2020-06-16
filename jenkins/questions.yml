@@ -1,0 +1,113 @@
+labels:
+  io.cattle.role: cluster # options are cluster/project
+  io.rancher.app_min_version: 7.3.8
+categories:
+- Blog
+- CMS
+questions:
+- variable: defaultImage
+  default: true
+  description: "Use default Docker image"
+  label: Use Default Image
+  type: boolean
+  show_subquestion_if: false
+  group: "Container Images"
+  subquestions:
+  - variable: image.repository
+    default: "bitnami/jenkins"
+    description: "Jenkins image name"
+    type: string
+    label: Jenkins Image Name
+  - variable: image.tag
+    default: "2.222.3-debian-10-r0"
+    description: "Jenkins image tag"
+    type: string
+    label: Image Tag
+- variable: jenkinsUser
+  default: "user"
+  description: "User of the application"
+  type: string
+  required: true
+  label: Jenkins Usernname
+  group: "Jenkins Settings"
+- variable: jenkinsPassword
+  default: ""
+  description: "password will be auto-generated if not specified"
+  type: password
+  label: Jenkins Password
+  group: "Jenkins Settings"  
+- variable: jenkinsHome
+  default: "/opt/bitnami/jenkins/jenkins_home"
+  description: "Path of the application"
+  type: string
+  required: true
+  label: Jenkins Directory
+  group: "Jenkins Settings"
+- variable: persistence.enabled
+  default: false
+  description: "Enable persistent volume for Jenkins"
+  type: boolean
+  required: true
+  label: Jenkins Persistent Volume Enabled
+  show_subquestion_if: true
+  group: "Jenkins Settings"
+  subquestions:
+  - variable: persistence.size
+    default: "10Gi"
+    description: "Jenkins Persistent Volume Size"
+    type: string
+    label: Jenkins Volume Size
+  - variable: persistence.storageClass
+    default: ""
+    description: "If undefined or null, uses the default StorageClass. Default to null"
+    type: storageclass
+    label: Default StorageClass for Jenkins
+  - variable: persistence.existingClaim
+    default: ""
+    description: "If not empty, uses the specified existing PVC instead of creating new one"
+    type: pvc
+    label: Existing Persistent Volume Claim for Jenkins
+- variable: ingress.enabled
+  default: true
+  description: "Expose app using Layer 7 Load Balancer - ingress"
+  type: boolean
+  label: Expose app using Layer 7 Load Balancer
+  show_subquestion_if: true
+  group: "Services and Load Balancing"
+  subquestions:
+  - variable: ingress.hostname
+    default: "xip.io"
+    description: "Hostname to your app installation"
+    type: hostname
+    required: true
+    label: Hostname
+- variable: service.type
+  default: "NodePort"
+  description: "Jenkins Service type"
+  type: enum
+  show_if: "ingress.enabled=false"
+  options:
+  - "ClusterIP"
+  - "NodePort"
+  - "LoadBalancer"
+  required: true
+  label: Jenkins Service Type
+  show_subquestion_if: "NodePort"
+  group: "Services and Load Balancing"
+  subquestions:
+  - variable: service.nodePorts.http
+    default: ""
+    description: "NodePort http port(to set explicitly, choose port between 30000-32767)"
+    type: int
+    min: 30000
+    max: 32767
+    show_if: "ingress.enabled=false&&serviceType=NodePort"
+    label: NodePort Http Port
+  - variable: service.nodePorts.https
+    default: ""
+    description: "NodePort https port(to set explicitly, choose port between 30000-32767)"
+    type: int
+    min: 30000
+    max: 32767
+    show_if: "ingress.enabled=false&&serviceType=NodePort"
+    label: NodePort Https Port
